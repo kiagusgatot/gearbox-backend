@@ -1,58 +1,254 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Gearbox — Backend API 🔧
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> REST API untuk Sistem Booking & Manajemen Layanan Bengkel Mobil
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-13.11.1-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat&logo=mysql)](https://mysql.com)
+[![Sanctum](https://img.shields.io/badge/Sanctum-4.3.2-FF2D20?style=flat)](https://laravel.com/docs/sanctum)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Deskripsi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Gearbox** adalah sistem booking dan manajemen layanan bengkel mobil berbasis web. Backend ini menyediakan REST API yang digunakan oleh aplikasi frontend untuk:
 
-## Learning Laravel
+- Mengelola layanan bengkel (jenis servis, harga, durasi)
+- Mengatur jadwal ketersediaan layanan
+- Memproses booking dari pelanggan
+- Tracking status servis secara real-time
+- Manajemen kendaraan pelanggan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tech Stack
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+| Teknologi | Versi | Kegunaan |
+|-----------|-------|----------|
+| Laravel | 13.11.1 | PHP Framework |
+| PHP | 8.4 | Backend Language |
+| MySQL | 8.0 | Database |
+| Laravel Sanctum | 4.3.2 | API Authentication |
+| L5-Swagger | latest | API Documentation |
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🗄️ Database Design
+
+### ERD
+
+🔗 **[Lihat ERD di dbdiagram.io](https://dbdiagram.io/d/GEARBOX-ERD-69a2a47da3f0aa31e16030a4)**
+
+### Tabel
+
+| Tabel | Deskripsi |
+|-------|-----------|
+| `users` | Data user dengan role admin/user |
+| `vehicles` | Kendaraan milik user |
+| `services` | Jenis layanan bengkel |
+| `service_schedules` | Jadwal ketersediaan layanan |
+| `bookings` | Data booking pelanggan |
+| `booking_status_histories` | Audit trail perubahan status booking |
+| `reviews` | Review pelanggan setelah servis selesai |
+
+### Key Design Decisions
+- **Composite unique key** pada `service_schedules` — mencegah jadwal duplikat
+- **cascadeOnDelete** pada semua Foreign Key
+- **booking_code** auto-generate format `GBX-XXXXXXXX`
+- **booking_status_histories** — audit trail lengkap setiap perubahan status
+
+---
+
+## 🚀 Cara Menjalankan
+
+### Prasyarat
+- PHP >= 8.2
+- Composer
+- MySQL
+- XAMPP / Laragon (untuk development lokal)
+
+### Langkah Instalasi
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repository
+git clone https://github.com/kiagusgatot/gearbox-backend.git
+cd gearbox-backend
 
-php artisan boost:install
+# 2. Install dependencies
+composer install
+
+# 3. Copy environment file
+cp .env.example .env
+
+# 4. Generate app key
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Konfigurasi Database
 
-## Contributing
+Edit file `.env` dan sesuaikan konfigurasi database:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gearbox_db
+DB_USERNAME=root
+DB_PASSWORD=
 
-## Code of Conduct
+SESSION_DRIVER=file
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Jalankan Migration & Seeder
 
-## Security Vulnerabilities
+```bash
+# Buat database gearbox_db di MySQL terlebih dahulu, lalu:
+php artisan migrate --seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Jalankan Server
 
-## License
+```bash
+php artisan serve
+# Server berjalan di http://127.0.0.1:8000
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 📚 API Documentation
+
+Setelah server berjalan, akses **Swagger UI** di:
+
+```
+http://127.0.0.1:8000/api/documentation
+```
+
+Untuk generate ulang dokumentasi:
+
+```bash
+php artisan l5-swagger:generate
+```
+
+---
+
+## 👥 Default Accounts (Setelah Seeding)
+
+| Email | Password | Role |
+|-------|----------|------|
+| admin@gearbox.com | password123 | Admin |
+| budi@example.com | password123 | User |
+| siti@example.com | password123 | User |
+
+---
+
+## 🔌 API Endpoints
+
+### Auth
+| Method | Endpoint | Auth | Deskripsi |
+|--------|----------|------|-----------|
+| POST | `/api/register` | — | Register user baru |
+| POST | `/api/login` | — | Login & mendapat token |
+| POST | `/api/logout` | Token | Logout |
+| GET | `/api/me` | Token | Data user yang login |
+
+### Services
+| Method | Endpoint | Auth | Deskripsi |
+|--------|----------|------|-----------|
+| GET | `/api/services` | — | List semua layanan |
+| GET | `/api/services/{id}` | — | Detail layanan |
+| POST | `/api/admin/services` | Admin | Tambah layanan |
+| PUT | `/api/admin/services/{id}` | Admin | Update layanan |
+| DELETE | `/api/admin/services/{id}` | Admin | Hapus layanan |
+
+### Schedules
+| Method | Endpoint | Auth | Deskripsi |
+|--------|----------|------|-----------|
+| GET | `/api/schedules` | — | List jadwal (filter: service_id, date, is_available) |
+| GET | `/api/schedules/{id}` | — | Detail jadwal |
+| POST | `/api/admin/schedules` | Admin | Tambah jadwal |
+| PUT | `/api/admin/schedules/{id}` | Admin | Update jadwal |
+| DELETE | `/api/admin/schedules/{id}` | Admin | Hapus jadwal |
+
+### Vehicles
+| Method | Endpoint | Auth | Deskripsi |
+|--------|----------|------|-----------|
+| GET | `/api/vehicles` | Token | List kendaraan milik user |
+| GET | `/api/vehicles/{id}` | Token | Detail kendaraan |
+| POST | `/api/vehicles` | Token | Tambah kendaraan |
+| PUT | `/api/vehicles/{id}` | Token | Update kendaraan |
+| DELETE | `/api/vehicles/{id}` | Token | Hapus kendaraan |
+
+### Bookings
+| Method | Endpoint | Auth | Deskripsi |
+|--------|----------|------|-----------|
+| GET | `/api/bookings` | Token | Riwayat booking user |
+| GET | `/api/bookings/{id}` | Token | Detail booking + status history |
+| POST | `/api/bookings` | Token | Buat booking baru |
+| PUT | `/api/bookings/{id}/cancel` | Token | Batalkan booking |
+| GET | `/api/admin/bookings` | Admin | Semua booking |
+| PUT | `/api/admin/bookings/{id}/status` | Admin | Update status booking |
+
+### Reviews
+| Method | Endpoint | Auth | Deskripsi |
+|--------|----------|------|-----------|
+| GET | `/api/reviews` | — | List review (filter: service_id) |
+| POST | `/api/reviews` | Token | Buat review (booking harus completed) |
+| DELETE | `/api/admin/reviews/{id}` | Admin | Hapus review |
+
+---
+
+## 🔐 Authentication
+
+API menggunakan **Laravel Sanctum** dengan Bearer Token.
+
+```
+Authorization: Bearer {token}
+```
+
+Token didapat setelah berhasil login melalui `POST /api/login`.
+
+### Role-based Access
+
+| Role | Akses |
+|------|-------|
+| **Public** | GET services, schedules, reviews |
+| **User** | Semua public + kelola vehicles, bookings, reviews |
+| **Admin** | Semua user + CRUD services & schedules + kelola semua booking |
+
+---
+
+## ✅ Testing
+
+API sudah ditest menggunakan **Postman** dengan **25 skenario** — semua lulus 100%.
+
+| Kategori | Skenario |
+|----------|----------|
+| Auth & User Flow | Register, Login, Me, Logout |
+| CRUD & Business Logic | Create booking + GBX-code auto-generate |
+| Slot Validation | Booking jadwal penuh → 422 |
+| Security | User akses admin → 403, Review duplikat → 422 |
+
+---
+
+## 📁 Struktur Project
+
+```
+backend/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/Api/    # AuthController, ServiceController, dst.
+│   │   ├── Middleware/         # RoleMiddleware
+│   │   └── Requests/           # Form Request Validation
+│   └── Models/                 # Eloquent Models
+├── database/
+│   ├── migrations/             # 8 file migration
+│   └── seeders/                # UserSeeder, ServiceSeeder, ScheduleSeeder
+└── routes/
+    └── api.php                 # 33 API routes
+```
+
+---
+
+## 📄 License
+
+Project ini dibuat untuk keperluan Final Project Bootcamp Full Stack Web Development — Dibimbing.id
